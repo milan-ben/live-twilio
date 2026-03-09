@@ -12,6 +12,16 @@ function isE164(value) {
   return /^\+[1-9]\d{7,14}$/.test(value);
 }
 
+function normalizePhone(value) {
+  const input = String(value || "").trim();
+  if (!input) return "";
+  const compact = input.replace(/[\s().-]/g, "");
+  if (compact.startsWith("00")) {
+    return `+${compact.slice(2)}`;
+  }
+  return compact;
+}
+
 export async function POST(request) {
   const twiml = new twilio.twiml.VoiceResponse();
   const callerId = process.env.TWILIO_CALLER_ID;
@@ -23,7 +33,13 @@ export async function POST(request) {
   }
 
   const formData = await request.formData();
-  const to = String(formData.get("To") || "").trim();
+  const toRaw =
+    formData.get("To") ||
+    formData.get("to") ||
+    formData.get("PhoneNumber") ||
+    formData.get("phoneNumber") ||
+    "";
+  const to = normalizePhone(toRaw);
 
   if (!isE164(to)) {
     twiml.say("The destination number is invalid.");

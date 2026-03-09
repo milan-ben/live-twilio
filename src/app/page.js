@@ -7,6 +7,16 @@ function isE164(value) {
   return /^\+[1-9]\d{7,14}$/.test(value);
 }
 
+function normalizePhone(value) {
+  const input = String(value || "").trim();
+  if (!input) return "";
+  const compact = input.replace(/[\s().-]/g, "");
+  if (compact.startsWith("00")) {
+    return `+${compact.slice(2)}`;
+  }
+  return compact;
+}
+
 export default function Home() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [status, setStatus] = useState("Loading...");
@@ -108,7 +118,8 @@ export default function Home() {
 
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
-      const call = await device.connect({ params: { To: phoneNumber } });
+      const normalizedPhone = normalizePhone(phoneNumber);
+      const call = await device.connect({ params: { To: normalizedPhone, to: normalizedPhone } });
       setActiveCall(call);
       bindCallEvents(call);
     } catch (error) {
@@ -150,7 +161,7 @@ export default function Home() {
 
         <input
           value={phoneNumber}
-          onChange={(event) => setPhoneNumber(event.target.value.trim())}
+          onChange={(event) => setPhoneNumber(event.target.value)}
           placeholder="+491234567890"
           style={{
             width: "100%",
