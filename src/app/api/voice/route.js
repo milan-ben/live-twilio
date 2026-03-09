@@ -2,6 +2,15 @@ import twilio from "twilio";
 
 export const runtime = "nodejs";
 
+export async function GET() {
+  const twiml = new twilio.twiml.VoiceResponse();
+  twiml.say("Voice endpoint is online.");
+
+  return new Response(twiml.toString(), {
+    headers: { "Content-Type": "text/xml" },
+  });
+}
+
 export async function POST(req) {
   const twiml = new twilio.twiml.VoiceResponse();
 
