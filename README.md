@@ -1,36 +1,64 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Twilio Live Dialer (Next.js + Vercel)
 
-## Getting Started
+Minimal frontend + backend app that lets you enter a customer phone number and place a live call via Twilio Voice.
 
-First, run the development server:
+## Stack Choice
+
+- **Backend:** Next.js Route Handlers (`/api/*`) running on Node.js runtime
+- **Frontend:** Next.js App Router page with Twilio Voice JS SDK
+- **Hosting:** Vercel (single project for frontend + backend)
+
+This is generally simpler and better suited for Vercel than NestJS for this specific use case.
+
+## 1) Configure Environment Variables
+
+Copy `.env.example` to `.env.local` and fill all values:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Required variables:
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+- `TWILIO_ACCOUNT_SID`
+- `TWILIO_API_KEY`
+- `TWILIO_API_SECRET`
+- `TWILIO_TWIML_APP_SID`
+- `TWILIO_CALLER_ID` (your Twilio phone number in E.164, e.g. `+12025550123`)
+- `NEXT_PUBLIC_TWILIO_EDGE` (optional, default: `ashburn`)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 2) Twilio Console Setup
 
-## Learn More
+1. Buy/choose a Twilio voice-enabled number (this becomes `TWILIO_CALLER_ID`).
+2. Create an API Key + Secret (use for `TWILIO_API_KEY` and `TWILIO_API_SECRET`).
+3. Create a **TwiML App**:
+   - Voice Request URL: `https://YOUR_DOMAIN/api/voice/outgoing`
+   - HTTP Method: `POST`
+4. Put the TwiML App SID into `TWILIO_TWIML_APP_SID`.
 
-To learn more about Next.js, take a look at the following resources:
+## 3) Run Locally
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm install
+npm run dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Open `http://localhost:3000`, enter a destination number in E.164 format (`+49...`), then click **Call**.
 
-## Deploy on Vercel
+## 4) Deploy to Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Push project to a Git provider.
+2. Import in Vercel.
+3. Add all env vars from `.env.local` into Vercel Project Settings.
+4. Deploy.
+5. Update your TwiML App Voice URL to your production domain if needed.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## API Endpoints
+
+- `GET /api/token`: creates a Twilio access token for browser voice calls.
+- `POST /api/voice/outgoing`: TwiML webhook that dials the number passed in `To`.
+
+## Notes
+
+- Use HTTPS in production (required for stable microphone/WebRTC behavior).
+- For best call quality/no interruptions: wired or strong network, low CPU load, and nearest Twilio edge.
