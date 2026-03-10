@@ -14,7 +14,9 @@ export default function Home() {
       const res = await fetch("/api/token");
       const data = await res.json();
 
-      const device = new Device(data.token);
+      console.log("TOKEN: " + data.token)
+
+      const device = new Device(data.token, { edge: "frankfurt" });
 
       device.on("registered", () => setStatus("Ready"));
       device.on("error", (err) => setStatus(err.message));
