@@ -16,10 +16,15 @@ export default function Home() {
 
       console.log("TOKEN: " + data.token)
 
-      const device = new Device(data.token, { edge: "frankfurt" });
+      const device = new Device(data.token, {
+        edge: "frankfurt"
+      });
 
       device.on("registered", () => setStatus("Ready"));
-      device.on("error", (err) => setStatus(err.message));
+      device.on("error", (err) => {
+        console.error("Twilio error:", err);
+        setStatus(`${err.name} (${err.code}): ${err.message}`);
+      });
 
       await device.register();
       setDevice(device);

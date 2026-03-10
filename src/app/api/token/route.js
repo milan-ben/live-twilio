@@ -16,6 +16,7 @@ export async function GET() {
   token.addGrant(
     new VoiceGrant({
       outgoingApplicationSid: process.env.TWILIO_TWIML_APP_SID,
+      incomingAllow: false,
     })
   );
 
